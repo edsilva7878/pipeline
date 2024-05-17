@@ -36,7 +36,7 @@ pipeline {
     
     post {
         always {
-            // Mensagem de conclusão do pipeline
+            // Pipeline conluída
             echo 'Pipeline finished. Visit http://localhost:8080 to see the static site.'
         }
     }
