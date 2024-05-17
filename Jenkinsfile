@@ -24,7 +24,7 @@ pipeline {
             }
         }
         
-        stage('Start Simple HTTP Server') {
+        stage('Iniciando um HTTP Server') {
             steps {
                 script {
                     // Inicia o servidor HTTP simples do Python
