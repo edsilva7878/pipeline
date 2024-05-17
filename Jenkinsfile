@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     stages {
-        stage('Create Static Web Page') {
+        stage('Criando uma pagina estatica') {
             steps {
                 script {
                     // Cria um diretório para a página estática
