@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     stages {
-        stage('Build') {
+        stage('Build-V1') {
             steps {
                 echo 'Construindo...'
                 // Aqui você colocaria os comandos para compilar seu código, como 'mvn compile' para projetos Maven ou 'npm install' para projetos Node.js
