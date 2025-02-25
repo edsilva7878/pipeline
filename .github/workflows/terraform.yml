@@ -1,0 +1,74 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - main  # Executa a pipeline quando houver push na branch "main"
+  pull_request:
+    branches:
+      - main  # Também executa para pull requests na branch "main"
+
+env:
+  AWS_REGION: "us-east-1"
+  AWS_ROLE_ARN: "arn:aws:iam::901392891750:role/embratel.atendimento"
+  AWS_SOURCE_PROFILE: "601156111743_embratel.atendimento"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Verify AWS CLI
+      run: aws sts get-caller-identity
+
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.6.6
+
+    - name: Terraform Init
+      run: terraform init -reconfigure
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Terraform Plan
+      run: terraform plan -out=plan.out
+      continue-on-error: true
+
+    - name: Save Terraform Plan Output
+      uses: actions/upload-artifact@v3
+      with:
+        name: plan-out
+        path: plan.out
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve plan.out
+
+    - name: Terraform Destroy (Manual)
+      if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+      run: terraform destroy -auto-approve
+
+    - name: Upload Terraform State
+      uses: actions/upload-artifact@v3
+      with:
+        name: terraform-state
+        path: terraform.tfstate
+
+    - name: Upload CSV Credentials
+      uses: actions/upload-artifact@v3
+      with:
+        name: credentials-csv
+        path: credentials.csv
